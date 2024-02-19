@@ -1,6 +1,6 @@
 open Bdfparser
 
 let () =
-  match Bdf.load_font "minimal.bdf" with
+  match Load.load_font "minimal.bdf" with
   | None -> Printf.printf "nothing\n"
-  | Some v -> Printf.printf "Versin %f\n" v
+  | Some h -> Printf.printf "Header count %d\n" (List.length h)

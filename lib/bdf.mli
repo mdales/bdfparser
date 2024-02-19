@@ -1,10 +1,32 @@
-type t = float;;
+type t = {
+  version : float ;
+}
 
 type token = 
-| FLOAT of (float)
 | EOL
-| EOF
-| STARTFONT
+| FLOAT of (float)
+| INT of (int)
+| STRING of (string)
+(* | BBX
+| BITMAP
+| BOUNDINGBOX
+| CHARS
+| COMMENT
+| CONTENTVERSION
+| DWIDTH
+| DWIDTH1
+| ENCODING
+| ENDCHAR *)
 | ENDFONT
-
-val load_font: string -> t option;;
+(* | ENDPROPERTIES
+| FONTNAME
+| METRICSET
+| SIZE
+| STARTCHAR *)
+| STARTFONT
+(* | STARTPROPERTIES
+| WIDTH
+| SWIDTH
+| SWIDTH1
+| VVECTOR *)
+| EOF

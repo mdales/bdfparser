@@ -1,18 +1,33 @@
 
-type t = float
+type t = {
+  version : float ;
+}
 
 type token = 
-| FLOAT of (float)
 | EOL
-| EOF
-| STARTFONT
+| FLOAT of (float)
+| INT of (int)
+| STRING of (string)
+(* | BBX
+| BITMAP
+| BOUNDINGBOX
+| CHARS
+| COMMENT
+| CONTENTVERSION
+| DWIDTH
+| DWIDTH1
+| ENCODING
+| ENDCHAR *)
 | ENDFONT
-
-(* val prog: (Lexing.lexbuf -> token) -> Lexing.lexbuf -> (Wibble.value option) *)
-
-
-let load_font (filename: string) : t option =
-  let ic = In_channel.open_text filename in
-  let lexbuf = Lexing.from_channel ic in
-  Parser.prog Lexer.read lexbuf
-
+(* | ENDPROPERTIES
+| FONTNAME
+| METRICSET
+| SIZE
+| STARTCHAR *)
+| STARTFONT
+(* | STARTPROPERTIES
+| WIDTH
+| SWIDTH
+| SWIDTH1
+| VVECTOR *)
+| EOF
