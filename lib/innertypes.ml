@@ -10,6 +10,8 @@ type header =
   | `BoundingBox of int * int * int * int
   | `Comment of string
   | `Chars of int
+  | `MetricSet of int
+  | `ContentVersion of int
   | `Properties of (string * property_val) list
   | `Noop
   ]

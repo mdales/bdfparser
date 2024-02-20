@@ -25,15 +25,15 @@ rule read =
   | "FONTBOUNDINGBOX" { BOUNDINGBOX }
   | "CHARS"           { CHARS }
   | "COMMENT"         { Printf.printf "com\n"; COMMENT }
-  (* | "CONTENTVERSION"  { CONTENTVERSION }
-  | "DWIDTH"          { DWIDTH }
+  | "CONTENTVERSION"  { CONTENTVERSION }
+  (* | "DWIDTH"          { DWIDTH }
   | "DWIDTH1"         { DWIDTH1 }
   | "ENCODING"        { ENCODING }
   | "ENDCHAR"         { ENDCHAR } *)
   | "ENDFONT"         { Printf.printf "ef\n"; ENDFONT }
   | "ENDPROPERTIES"   { Printf.printf "ep\n"; ENDPROPERTIES }
   | "FONT"            { FONTNAME }
-  (* | "METRICSET"       { METRICSET } *)
+  | "METRICSET"       { METRICSET }
   | "SIZE"            { SIZE }
   (* | "STARTCHAR"       { STARTCHAR } *)
   | "STARTFONT"       { STARTFONT }

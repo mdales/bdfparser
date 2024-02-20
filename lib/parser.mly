@@ -8,7 +8,7 @@
 %token BOUNDINGBOX
 %token CHARS
 %token COMMENT
-// %token CONTENTVERSION
+%token CONTENTVERSION
 // %token DWIDTH
 // %token DWIDTH1
 // %token ENCODING
@@ -16,7 +16,7 @@
 %token ENDFONT
 %token ENDPROPERTIES
 %token FONTNAME
-// %token METRICSET
+%token METRICSET
 %token SIZE
 // %token STARTCHAR
 %token STARTFONT
@@ -56,6 +56,12 @@ comment:
 chars:
   CHARS ; v = INT { v }
 
+contentversion:
+  CONTENTVERSION ; v = INT { v }
+
+metricset:
+  METRICSET ; v = INT { v }
+
 property_str:
   k = NAME ; s = STRING ; EOL { (k, `String s) }
 
@@ -78,29 +84,25 @@ properties:
 font_part:
   // | BBX             { `Noop }
   // | BITMAP          { `Noop }
-  // | BOUNDINGBOX             { `Noop }
-  // | CONTENTVERSION             { `Noop }
   // | DWIDTH             { `Noop }
   // | DWIDTH1             { `Noop }
   | ENDFONT         { `Noop }
   // | ENDCHAR { `Noop }
-  // | ENDPROPERTIES { `Noop }
-  // | METRICSET { `Noop }
   // | STARTCHAR { `Noop }
   // | SWIDTH { `Noop }
   // | SWIDTH1 { `Noop }
   // | VVECTOR { `Noop }
-  // | COMMENT { `Noop }
   // | ENCODING { `Noop }
-  // | STARTPROPERTIES { `Noop }
   // | WIDTH { `Noop }
-  | v = properties    { `Properties v }
-  | v = bounding_box  { `BoundingBox v }
-  | v = chars         { `Chars v }
-  | v = comment       { `Comment v }
-  | v = font_name     { `FontName v }
-  | v = size          { `Size v } 
-  | v = start_font    { `Version v }
+  | v = properties      { `Properties v }
+  | v = bounding_box    { `BoundingBox v }
+  | v = chars           { `Chars v }
+  | v = comment         { `Comment v }
+  | v = contentversion  { `ContentVersion v }
+  | v = font_name       { `FontName v }
+  | v = metricset       { `MetricSet v }
+  | v = size            { `Size v } 
+  | v = start_font      { `Version v }
   ;
 
   
