@@ -1,42 +1,35 @@
 %token EOL
 %token <int> INT
+%token <int> HEXINT
 %token <float> FLOAT
 %token <string> NAME
 %token <string> STRING
-// %token BBX
-// %token BITMAP
+%token BBX
+%token BITMAP
 %token BOUNDINGBOX
 %token CHARS
 %token COMMENT
 %token CONTENTVERSION
-// %token DWIDTH
-// %token DWIDTH1
-// %token ENCODING
-// %token ENDCHAR
+%token DWIDTH
+%token DWIDTH1
+%token ENCODING
+%token ENDCHAR
 %token ENDFONT
 %token ENDPROPERTIES
 %token FONTNAME
 %token METRICSET
 %token SIZE
-// %token STARTCHAR
+%token STARTCHAR
 %token STARTFONT
 %token STARTPROPERTIES
-// %token WIDTH
-// %token SWIDTH
-// %token SWIDTH1
-// %token VVECTOR
+%token SWIDTH
+%token SWIDTH1
+%token VVECTOR
 %token EOF
 
 %start <Innertypes.header list option> prog
 
 %%
-
-prog:
-  | f = font { Some f }
-  ;
-
-font: 
-  vl = separated_list(EOL, font_part); EOF { vl }
 
 start_font:
   STARTFONT ; v = FLOAT { v } ;
@@ -62,6 +55,8 @@ contentversion:
 metricset:
   METRICSET ; v = INT { v }
 
+// ----------------- PROPERTIES ------
+
 property_str:
   k = NAME ; s = STRING ; EOL { (k, `String s) }
 
@@ -81,19 +76,73 @@ properties:
   | STARTPROPERTIES ; i = INT ; EOL ; pl = property_list ; ENDPROPERTIES { let _ = i in pl }
   ;
   
+// ----------------- CHARS ------------
+
+bbx:
+  BBX ; a = INT ; b = INT ; c = INT ; d = INT ; EOL { (a, b, c, d) }
+
+encoding:
+  ENCODING ; v = INT ; EOL { v }
+
+swidth:
+  SWIDTH ; x = INT ; y = INT ; EOL { (x, y) }
+
+dwidth:
+  DWIDTH ; x = INT ; y = INT ; EOL { (x, y) }
+
+swidth1:
+  SWIDTH1 ; x = INT ; y = INT ; EOL { (x, y) }
+
+dwidth1:
+  DWIDTH1 ; x = INT ; y = INT ; EOL { (x, y) }
+
+vvector:
+  VVECTOR ; x = INT ; y = INT ; EOL { (x, y) }
+
+bytes:
+  // Probably a better way if I knew how to tell the parser to backtrack?
+  | v = INT ; EOL { int_of_string (Printf.sprintf "0x%d" v) }
+  | v = HEXINT ; EOL { v }
+  ;
+
+bitmap:
+  BITMAP ; EOL ; b = list(bytes) { b }
+
+char_part:
+  | v = bbx       { `BBox v }
+  | v = encoding  { `Encoding v }
+  | v = swidth    { `SWidth v }
+  | v = dwidth    { `DWidth v }
+  | v = swidth1   { `SWidth1 v }
+  | v = dwidth1   { `DWidth1 v }
+  | v = vvector   { `VVector v }
+  | v = bitmap    { `Bitmap v }
+  ;
+
+startchar:
+  // Again, there has to be a better way to do this, as we lose the 
+  // difference between a char A and char a, due to bouncing via int.
+  | STARTCHAR ; v = NAME { v }
+  | STARTCHAR ; v = INT { Printf.sprintf "%d" v }
+  | STARTCHAR ; v = HEXINT { Printf.sprintf "%x" v }
+  ;
+
+char:
+  n = startchar ; EOL ; parts = list(char_part) ; ENDCHAR { List.cons (`CharName n) parts }
+
+// ----------------- TOP LEVEL --------
+
+prog:
+  | f = font { Some f }
+  ;
+
+font: 
+  | vl = separated_list(EOL, font_part); EOF { vl }
+
 font_part:
-  // | BBX             { `Noop }
-  // | BITMAP          { `Noop }
-  // | DWIDTH             { `Noop }
-  // | DWIDTH1             { `Noop }
-  | ENDFONT         { `Noop }
-  // | ENDCHAR { `Noop }
-  // | STARTCHAR { `Noop }
-  // | SWIDTH { `Noop }
-  // | SWIDTH1 { `Noop }
-  // | VVECTOR { `Noop }
-  // | ENCODING { `Noop }
-  // | WIDTH { `Noop }
+  | ENDFONT             { `Noop }
+  | ENDFONT ; EOL       { `Noop }
+  | v = char            { `Char v }
   | v = properties      { `Properties v }
   | v = bounding_box    { `BoundingBox v }
   | v = chars           { `Chars v }
@@ -104,6 +153,3 @@ font_part:
   | v = size            { `Size v } 
   | v = start_font      { `Version v }
   ;
-
-  
-

@@ -8,40 +8,43 @@ exception SyntaxError of string
 let newline = ['\r' '\n']+
 let white = [' ' '\t']+
 let digit = ['0'-'9']
+let hexdigit = ['0'-'9' 'a'-'f' 'A'-'F']
 let int = '-'? digit+
+let hexint = hexdigit+
 let frac = '.' digit*
 let float = digit+ frac
-let name = ['a'-'z' 'A'-'Z' '-' '0'-'9' '_']+
-let string = '"' ['a'-'z' 'A'-'Z' '-' '0'-'9' ' ']* '"'
+let name = ['a'-'z' 'A'-'Z' '-' '0'-'9' '_' '+']+
+let string = '"' ['a'-'z' 'A'-'Z' '-' '0'-'9' ' ' '/' ':' '.' ',']* '"'
 
 rule read =
   parse
-  | white             { Printf.printf "w\n"; read lexbuf }
-  | newline           { Printf.printf "eol\n"; EOL }
+  | white             { read lexbuf }
+  | newline           { EOL }
   | float             { FLOAT (float_of_string (Lexing.lexeme lexbuf)) }
-  | int               { Printf.printf "int\n"; INT (int_of_string (Lexing.lexeme lexbuf)) }
-  (* | "BBX"             { BBX }
-  | "BITMAP"          { BITMAP } *)
+  | int               { INT (int_of_string (Lexing.lexeme lexbuf)) }
+  | hexint            { HEXINT (int_of_string (Printf.sprintf "0x%s" (Lexing.lexeme lexbuf))) }
+  | "BBX"             { BBX }
+  | "BITMAP"          { BITMAP }
   | "FONTBOUNDINGBOX" { BOUNDINGBOX }
   | "CHARS"           { CHARS }
-  | "COMMENT"         { Printf.printf "com\n"; COMMENT }
+  | "COMMENT"         { COMMENT }
   | "CONTENTVERSION"  { CONTENTVERSION }
-  (* | "DWIDTH"          { DWIDTH }
+  | "DWIDTH"          { DWIDTH }
   | "DWIDTH1"         { DWIDTH1 }
-  | "ENCODING"        { ENCODING }
-  | "ENDCHAR"         { ENDCHAR } *)
-  | "ENDFONT"         { Printf.printf "ef\n"; ENDFONT }
-  | "ENDPROPERTIES"   { Printf.printf "ep\n"; ENDPROPERTIES }
+  | "ENCODING"        { ENCODING } 
+  | "ENDCHAR"         { ENDCHAR } 
+  | "ENDFONT"         { ENDFONT }
+  | "ENDPROPERTIES"   { ENDPROPERTIES }
   | "FONT"            { FONTNAME }
   | "METRICSET"       { METRICSET }
   | "SIZE"            { SIZE }
-  (* | "STARTCHAR"       { STARTCHAR } *)
+  | "STARTCHAR"       { STARTCHAR }
   | "STARTFONT"       { STARTFONT }
-  | "STARTPROPERTIES" { Printf.printf "sp\n"; STARTPROPERTIES }
-  (* | "SWIDTH"          { SWIDTH }
+  | "STARTPROPERTIES" { STARTPROPERTIES }
+  | "SWIDTH"          { SWIDTH }
   | "SWIDTH1"         { SWIDTH1 }
-  | "VVECTOR"         { VVECTOR } *)
+  | "VVECTOR"         { VVECTOR } 
   | eof               { EOF }
-  | name              { Printf.printf "name\n"; NAME (Lexing.lexeme lexbuf) }
-  | string            { Printf.printf "string\n"; STRING (Lexing.lexeme lexbuf) }
+  | name              { NAME (Lexing.lexeme lexbuf) }
+  | string            { STRING (Lexing.lexeme lexbuf) }
 
