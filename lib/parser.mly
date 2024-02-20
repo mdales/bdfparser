@@ -56,25 +56,23 @@ comment:
 chars:
   CHARS ; v = INT { v }
 
-// property_str:
-//   k = NAME ; s = STRING { 
-//     let a : (string * Innertypes.property_val) = (k, `String s) in a
-//   }
+property_str:
+  k = NAME ; s = STRING ; EOL { (k, `String s) }
 
 property_int: 
-  k = NAME ; i = INT { (k, `Int i) }
+  k = NAME ; i = INT ; EOL { (k, `Int i) }
 
-// property:
-//   | v = property_int { v }
-//   | v = property_str { v }
+property:
+  | v = property_int { v }
+  | v = property_str { v }
+  ;
 
 property_list:
-  | pl = separated_nonempty_list(EOL, property_int)  { Printf.printf "pl"; pl }
+  | pl = list(property)  { pl }
   ;
 
 properties:
-  | STARTPROPERTIES ; i = INT ; EOL ; pl = property_list; EOL ; ENDPROPERTIES { let _ = i in pl }
-  | STARTPROPERTIES ; i = INT ; EOL ; ENDPROPERTIES { let _ = i in [] }
+  | STARTPROPERTIES ; i = INT ; EOL ; pl = property_list ; ENDPROPERTIES { let _ = i in pl }
   ;
   
 font_part:
