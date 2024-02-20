@@ -1,3 +1,8 @@
+type property_val = 
+  [ `Int of int
+  | `String of string
+  ]
+  
 type header =
   [ `Version of float
   | `FontName of string
@@ -5,5 +10,6 @@ type header =
   | `BoundingBox of int * int * int * int
   | `Comment of string
   | `Chars of int
+  | `Properties of (string * property_val) list
   | `Noop
   ]

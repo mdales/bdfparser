@@ -1,8 +1,8 @@
 %token EOL
 %token <int> INT
 %token <float> FLOAT
+%token <string> NAME
 %token <string> STRING
-%token QUOTE
 // %token BBX
 // %token BITMAP
 %token BOUNDINGBOX
@@ -14,13 +14,13 @@
 // %token ENCODING
 // %token ENDCHAR
 %token ENDFONT
-// %token ENDPROPERTIES
+%token ENDPROPERTIES
 %token FONTNAME
 // %token METRICSET
 %token SIZE
 // %token STARTCHAR
 %token STARTFONT
-// %token STARTPROPERTIES
+%token STARTPROPERTIES
 // %token WIDTH
 // %token SWIDTH
 // %token SWIDTH1
@@ -42,7 +42,7 @@ start_font:
   STARTFONT ; v = FLOAT { v } ;
 
 font_name:
-  FONTNAME ; v = STRING { v } ;
+  FONTNAME ; v = NAME { v } ;
 
 size:
   SIZE ; p = INT ; x = INT ; y = INT { (p, x, y) }
@@ -51,11 +51,32 @@ bounding_box:
   BOUNDINGBOX ; fBBx = INT ; fBBy = INT ; xoff = INT ; yoff = INT { (fBBx, fBBy, xoff, yoff) }
 
 comment:
-  COMMENT ; QUOTE ; v = STRING ; QUOTE { v }
+  COMMENT ; v = STRING { v }
 
 chars:
   CHARS ; v = INT { v }
 
+// property_str:
+//   k = NAME ; s = STRING { 
+//     let a : (string * Innertypes.property_val) = (k, `String s) in a
+//   }
+
+property_int: 
+  k = NAME ; i = INT { (k, `Int i) }
+
+// property:
+//   | v = property_int { v }
+//   | v = property_str { v }
+
+property_list:
+  | pl = separated_nonempty_list(EOL, property_int)  { Printf.printf "pl"; pl }
+  ;
+
+properties:
+  | STARTPROPERTIES ; i = INT ; EOL ; pl = property_list; EOL ; ENDPROPERTIES { let _ = i in pl }
+  | STARTPROPERTIES ; i = INT ; EOL ; ENDPROPERTIES { let _ = i in [] }
+  ;
+  
 font_part:
   // | BBX             { `Noop }
   // | BITMAP          { `Noop }
@@ -75,6 +96,7 @@ font_part:
   // | ENCODING { `Noop }
   // | STARTPROPERTIES { `Noop }
   // | WIDTH { `Noop }
+  | v = properties    { `Properties v }
   | v = bounding_box  { `BoundingBox v }
   | v = chars         { `Chars v }
   | v = comment       { `Comment v }
