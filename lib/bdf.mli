@@ -1,3 +1,2 @@
-type t = {
-  version : float ;
-}
+type t
+
