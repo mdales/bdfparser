@@ -31,11 +31,150 @@ ENDFONT|} in
   | None -> assert_failure "Got nothing"
   | Some l -> assert_equal l expected
 
+let test_properties_empty _ = 
+  let prose =
+{|STARTFONT 2.1
+STARTPROPERTIES 0
+ENDPROPERTIES
+ENDFONT|} in
+  let lexbuf = Lexing.from_string prose in
+  let ast = Parser.prog Lexer.read lexbuf in
+  let expected = [(`Version 2.1) ; (`Properties []) ; (`Noop)] in
+  match ast with
+  | None -> assert_failure "Got nothing"
+  | Some l -> assert_equal l expected
+
+let test_properties _ = 
+  let prose =
+{|STARTFONT 2.1
+STARTPROPERTIES 2
+FONT_THING 42
+FONT_OTHER "life, the universe, and everything"
+ENDPROPERTIES
+ENDFONT|} in
+  let lexbuf = Lexing.from_string prose in
+  let ast = Parser.prog Lexer.read lexbuf in
+  let expected = [
+    (`Version 2.1) ; 
+    (`Properties [ 
+      ("FONT_THING", (`Int 42)) ; 
+      ("FONT_OTHER", (`String {|"life, the universe, and everything"|}))
+    ]) ; 
+    (`Noop)
+  ] in
+  match ast with
+  | None -> assert_failure "Got nothing"
+  | Some l -> assert_equal l expected
+
+let test_font_name _ = 
+  let prose =
+{|STARTFONT 2.1
+FONT -gnu-unifont-medium-r-normal--16-160-75-75-c-80-iso10646-1
+ENDFONT|} in
+  let lexbuf = Lexing.from_string prose in
+  let ast = Parser.prog Lexer.read lexbuf in
+  let expected = [
+    (`Version 2.1) ; 
+    (`FontName "-gnu-unifont-medium-r-normal--16-160-75-75-c-80-iso10646-1") ; 
+    (`Noop)
+  ] in
+  match ast with
+  | None -> assert_failure "Got nothing"
+  | Some l -> assert_equal l expected
+
+let test_font_size _ = 
+  let prose =
+{|STARTFONT 2.1
+SIZE 1 2 3
+ENDFONT|} in
+  let lexbuf = Lexing.from_string prose in
+  let ast = Parser.prog Lexer.read lexbuf in
+  let expected = [
+    (`Version 2.1) ; 
+    (`Size (1, 2, 3)) ; 
+    (`Noop)
+  ] in
+  match ast with
+  | None -> assert_failure "Got nothing"
+  | Some l -> assert_equal l expected
+
+let test_bounding_box _ =
+  let prose =
+{|STARTFONT 2.1
+FONTBOUNDINGBOX 1 2 3 4
+ENDFONT|} in
+    let lexbuf = Lexing.from_string prose in
+    let ast = Parser.prog Lexer.read lexbuf in
+    let expected = [
+      (`Version 2.1) ;
+      (`BoundingBox (1, 2, 3, 4)) ;
+      (`Noop)
+    ] in
+    match ast with
+    | None -> assert_failure "Got nothing"
+    | Some l -> assert_equal l expected
+
+let test_content_version _ =
+  let prose =
+{|STARTFONT 2.1
+CONTENTVERSION 42
+ENDFONT|} in
+    let lexbuf = Lexing.from_string prose in
+    let ast = Parser.prog Lexer.read lexbuf in
+    let expected = [
+      (`Version 2.1) ;
+      (`ContentVersion 42) ;
+      (`Noop)
+    ] in
+    match ast with
+    | None -> assert_failure "Got nothing"
+    | Some l -> assert_equal l expected
+
+let test_metric_set _ =
+  let prose =
+{|STARTFONT 2.1
+METRICSET 1
+ENDFONT|} in
+    let lexbuf = Lexing.from_string prose in
+    let ast = Parser.prog Lexer.read lexbuf in
+    let expected = [
+      (`Version 2.1) ;
+      (`MetricSet 1) ;
+      (`Noop)
+    ] in
+    match ast with
+    | None -> assert_failure "Got nothing"
+    | Some l -> assert_equal l expected
+
+let test_no_chars _ =
+  let prose =
+{|STARTFONT 2.1
+CHARS 0
+ENDFONT|} in
+    let lexbuf = Lexing.from_string prose in
+    let ast = Parser.prog Lexer.read lexbuf in
+    let expected = [
+      (`Version 2.1) ;
+      (`Chars 0) ;
+      (`Noop)
+    ] in
+    match ast with
+    | None -> assert_failure "Got nothing"
+    | Some l -> assert_equal l expected
+
 let suite =
   "BasicParsingTests" >::: [
-    "test_empty_parsing" >:: test_empty_parsing;
-    "test_basic_parsing" >:: test_basic_parsing;
-    "test_comment" >:: test_comment
+    "test_empty_parsing" >:: test_empty_parsing ;
+    "test_basic_parsing" >:: test_basic_parsing ;
+    "Comment" >:: test_comment ;
+    "Empty properties" >:: test_properties_empty ;
+    "Filled properties" >:: test_properties ;
+    "Font name" >:: test_font_name ;
+    "Font size" >:: test_font_size ;
+    "Bounding box" >:: test_bounding_box ;
+    "Content version" >:: test_content_version ;
+    "No chars" >:: test_no_chars ;
+    "Metric set" >:: test_metric_set ;
   ]
 
 let () =
