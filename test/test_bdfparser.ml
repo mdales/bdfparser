@@ -6,9 +6,9 @@ let test_empty_parsing _ =
   let ast = Parser.prog Lexer.read lexbuf in
   match ast with
   | None -> assert_failure "Got nothing"
-  | Some l -> assert_equal l [] 
+  | Some l -> assert_equal l []
 
-let test_basic_parsing _ = 
+let test_basic_parsing _ =
   let prose = 
 {|STARTFONT 2.1
 ENDFONT|} in
@@ -18,11 +18,24 @@ ENDFONT|} in
   match ast with
   | None -> assert_failure "Got nothing"
   | Some l -> assert_equal l expected
-  
+
+let test_comment _ =
+  let prose =
+{|STARTFONT 2.1
+COMMENT "hello world"
+ENDFONT|} in
+  let lexbuf = Lexing.from_string prose in
+  let ast = Parser.prog Lexer.read lexbuf in
+  let expected = [(`Version 2.1) ; (`Comment {|"hello world"|}) ; (`Noop)] in
+  match ast with
+  | None -> assert_failure "Got nothing"
+  | Some l -> assert_equal l expected
+
 let suite =
   "BasicParsingTests" >::: [
     "test_empty_parsing" >:: test_empty_parsing;
-    "test_basic_parsing" >:: test_basic_parsing
+    "test_basic_parsing" >:: test_basic_parsing;
+    "test_comment" >:: test_comment
   ]
 
 let () =
