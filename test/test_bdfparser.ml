@@ -162,6 +162,73 @@ ENDFONT|} in
     | None -> assert_failure "Got nothing"
     | Some l -> assert_equal l expected
 
+let test_empty_char _ =
+  let prose =
+{|STARTFONT 2.1
+CHARS 1
+STARTCHAR char0000
+ENDCHAR
+ENDFONT|} in
+    let lexbuf = Lexing.from_string prose in
+    let ast = Parser.prog Lexer.read lexbuf in
+    let expected = [
+      (`Version 2.1) ;
+      (`Chars 1) ;
+      (`Char [
+        (`CharName "char0000")
+      ]) ;
+      (`Noop)
+    ] in
+    match ast with
+    | None -> assert_failure "Got nothing"
+    | Some l -> assert_equal l expected
+
+let test_char_encoding _ =
+  let prose =
+{|STARTFONT 2.1
+CHARS 1
+STARTCHAR char0000
+ENCODING 42
+ENDCHAR
+ENDFONT|} in
+    let lexbuf = Lexing.from_string prose in
+    let ast = Parser.prog Lexer.read lexbuf in
+    let expected = [
+      (`Version 2.1) ;
+      (`Chars 1) ;
+      (`Char [
+        (`CharName "char0000") ;
+        (`Encoding 42)
+      ]) ;
+      (`Noop)
+    ] in
+    match ast with
+    | None -> assert_failure "Got nothing"
+    | Some l -> assert_equal l expected
+
+let test_char_bbx _ =
+  let prose =
+{|STARTFONT 2.1
+CHARS 1
+STARTCHAR char0000
+BBX 1 2 3 4
+ENDCHAR
+ENDFONT|} in
+    let lexbuf = Lexing.from_string prose in
+    let ast = Parser.prog Lexer.read lexbuf in
+    let expected = [
+      (`Version 2.1) ;
+      (`Chars 1) ;
+      (`Char [
+        (`CharName "char0000") ;
+        (`BBox (1, 2, 3, 4))
+      ]) ;
+      (`Noop)
+    ] in
+    match ast with
+    | None -> assert_failure "Got nothing"
+    | Some l -> assert_equal l expected
+
 let suite =
   "BasicParsingTests" >::: [
     "test_empty_parsing" >:: test_empty_parsing ;
@@ -175,6 +242,9 @@ let suite =
     "Content version" >:: test_content_version ;
     "No chars" >:: test_no_chars ;
     "Metric set" >:: test_metric_set ;
+    "Empty char definition" >:: test_empty_char ;
+    "Char encoding" >:: test_char_encoding ;
+    "Char bounding box" >:: test_char_bbx ;
   ]
 
 let () =
