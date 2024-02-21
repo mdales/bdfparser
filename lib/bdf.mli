@@ -1,32 +1,3 @@
 type t = {
   version : float ;
 }
-
-type token = 
-| EOL
-| FLOAT of (float)
-| INT of (int)
-| STRING of (string)
-(* | BBX
-| BITMAP
-| BOUNDINGBOX
-| CHARS
-| COMMENT
-| CONTENTVERSION
-| DWIDTH
-| DWIDTH1
-| ENCODING
-| ENDCHAR *)
-| ENDFONT
-(* | ENDPROPERTIES
-| FONTNAME
-| METRICSET
-| SIZE
-| STARTCHAR *)
-| STARTFONT
-(* | STARTPROPERTIES
-| WIDTH
-| SWIDTH
-| SWIDTH1
-| VVECTOR *)
-| EOF
