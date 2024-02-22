@@ -1,5 +1,5 @@
 
-type c = {
+type glyph = {
   name : string;
   encoding : int;
   swidth : int * int;
@@ -10,7 +10,7 @@ type c = {
   bounding_box : int * int * int * int ;
 }
 
-let default_c = {
+let default_glyph = {
   name = "" ;
   encoding = 0 ;
   swidth = (0, 0) ;
@@ -29,7 +29,7 @@ type t = {
   content_version : int ;
   metric_set : int ;
   properties : (string * Innertypes.property_val) list;
-  characters : c list;
+  characters : glyph list;
 }
 
 let default_t = {
@@ -43,8 +43,8 @@ let default_t = {
   characters = [] ;
 }
 
-let innerchar_to_char (ic : Innertypes.char_property_val list) : c =
-  List.fold_left (fun (acc : c) (item : Innertypes.char_property_val) : c ->
+let innerchar_to_glyph (ic : Innertypes.char_property_val list) : glyph =
+  List.fold_left (fun (acc : glyph) (item : Innertypes.char_property_val) : glyph ->
     match item with
     | `CharName n -> { acc with name=n }
     | `Encoding e -> { acc with encoding=e }
@@ -55,7 +55,7 @@ let innerchar_to_char (ic : Innertypes.char_property_val list) : c =
     | `VVector v -> { acc with vvector=v }
     | `BBox b -> { acc with bounding_box=b }
     | `Bitmap _ -> acc
-  ) default_c ic
+  ) default_glyph ic
 
 
 let create (filename : string) : (t, string) result =
@@ -77,7 +77,7 @@ let create (filename : string) : (t, string) result =
     | `MetricSet s -> { acc with metric_set=s }
     | `ContentVersion c -> { acc with content_version=c }
     | `Properties p -> { acc with properties=(List.concat [acc.properties ; p]) }
-    | `Char c -> { acc with characters=((innerchar_to_char c) :: acc.characters)}
+    | `Char c -> { acc with characters=((innerchar_to_glyph c) :: acc.characters)}
     | `Noop -> acc
     ) default_t ast)
   )
@@ -90,3 +90,7 @@ let bdf_version t =
 
 let version t =
   t.content_version
+
+  let glyph_count t =
+    List.length t.characters
+
