@@ -1,13 +1,14 @@
 type t
 
-val create: string -> (t, string) result;;
+type glyph
 
-val name: t -> string;;
+val create: string -> (t, string) result
 
-val bdf_version: t -> float;;
+val name: t -> string
 
-val version: t -> int;;
+val bdf_version: t -> float
 
+val version: t -> int
 
 val glyph_count: t -> int
 (** [glyph_count font] Returns a count of how many glyphs are in the font. *)
