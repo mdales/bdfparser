@@ -12,6 +12,7 @@ bug-reports: "https://github.com/mdales/bdfparser/issues"
 depends: [
   "ocaml"
   "dune" {>= "3.14"}
+  "menhir"
   "odoc" {with-doc}
 ]
 build: [

@@ -21,6 +21,6 @@
  (name bdfparser)
  (synopsis "Library to parse BDF font files.")
  (description "A longer description")
- (depends ocaml dune)
+ (depends ocaml dune menhir)
  (tags
   (font rendering bitmap)))

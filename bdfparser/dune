@@ -8,4 +8,5 @@
 (ocamllex lexer)
 
 (library
+ (public_name bdfparser)
  (name bdfparser))
