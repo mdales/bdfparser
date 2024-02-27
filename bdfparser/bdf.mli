@@ -17,6 +17,9 @@ val glyph_of_char: t -> Uchar.t -> glyph option
 (** [glyph_of_char font char] Gets the glyph that maps to a given character in the font,
     or None if that character doesn't have an entry. *)
 
+val glyph_name: glyph -> string
+(** [glyph_name glyph] Returns the name in the font file of the specified glyph. *)
+
 val glyph_dimensions: glyph -> (int * int)
 (** [glyph_dimensions glyph] Returns the width and height of the specified glyph. *)
 

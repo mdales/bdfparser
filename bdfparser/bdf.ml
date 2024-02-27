@@ -132,6 +132,9 @@ let glyph_of_char (font : t) (u : Uchar.t) : glyph option =
     | true -> Some font.glyphs.(index)
   )
 
+let glyph_name (g : glyph) : string =
+    g.name
+
 let glyph_dimensions (g : glyph) : (int * int) =
   (* This is totes wrong, but enough to bootstrap with I think for basic western chars *)
   let x, _ = g.dwidth in
