@@ -1,4 +1,4 @@
 (executable
- (public_name bdfparser)
+ (public_name bdfinfo)
  (name main)
  (libraries bdfparser))
