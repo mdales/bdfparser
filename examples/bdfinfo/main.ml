@@ -10,6 +10,20 @@ let speclist = [
   ("-s", Arg.Set_string test_str, "Test string");
 ]
 
+let draw_char (data : bytes) (bits_per_row : int) : unit =
+  let bytes_per_row = (bits_per_row / 8) + (if (bits_per_row mod 8) == 0 then 0 else 1) in
+  for h = 0 to (((Bytes.length data) / bytes_per_row) - 1) do
+    Printf.printf "%02d: " h;
+    for w = (bytes_per_row - 1) downto 0 do
+      let bit = int_of_char (Bytes.get data ((h * bytes_per_row) + w)) in
+      for s = 0 to 7 do
+        let isbit = (bit lsl s) land 0x80 in
+        Printf.printf "%c" (if isbit != 0 then '*' else '.')
+      done
+    done;
+    Printf.printf "\n"
+  done
+
 let display_char_info (f : Bdf.t) (c : char) : unit =
   match Bdf.glyph_of_char f (Uchar.of_char c) with
   | None -> Printf.printf "\nCharacter: %c\nNot found\n" c
@@ -19,7 +33,8 @@ let display_char_info (f : Bdf.t) (c : char) : unit =
     let x, y = Bdf.glyph_dimensions g in
     Printf.printf "Dimensions: %d x %d\n" x y;
     let bitmap = Bdf.glyph_bitmap g in
-    Printf.printf "Bitmap bytes: %d\n" (Bytes.length bitmap)
+    Printf.printf "Bitmap bytes: %d\n" (Bytes.length bitmap);
+    draw_char bitmap x;
   )
 
 let display_font_info (f : Bdf.t) (example : string) : unit =
@@ -36,7 +51,6 @@ let display_font_info (f : Bdf.t) (example : string) : unit =
     )
   )
   in loop sl
-
 
 let () =
   Arg.parse speclist anon_fun usage_msg;
