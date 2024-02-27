@@ -16,7 +16,9 @@ let draw_char (data : bytes) (bits_per_row : int) : unit =
     Printf.printf "%02d: " h;
     for w = (bytes_per_row - 1) downto 0 do
       let bit = int_of_char (Bytes.get data ((h * bytes_per_row) + w)) in
-      for s = 0 to 7 do
+      let bits_offset = ((bytes_per_row - 1) - w) * 8 in
+      let remaining = if (bits_offset + 8) < bits_per_row then 7 else ((bits_per_row - bits_offset) - 1) in
+      for s = 0 to remaining do
         let isbit = (bit lsl s) land 0x80 in
         Printf.printf "%c" (if isbit != 0 then '*' else '.')
       done
