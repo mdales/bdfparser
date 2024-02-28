@@ -20,6 +20,12 @@ val glyph_of_char: t -> Uchar.t -> glyph option
 val glyph_name: glyph -> string
 (** [glyph_name glyph] Returns the name in the font file of the specified glyph. *)
 
+val glyph_bbox: glyph -> (int * int * int * int)
+(** [glyph_bbox glyph] The underlying font bbox parameter. *)
+
+val glyph_dwidth: glyph -> (int * int)
+(** [glyph_dwidth glyph] The underlying font dwidth parameter. *)
+
 val glyph_dimensions: glyph -> (int * int)
 (** [glyph_dimensions glyph] Returns the width and height of the specified glyph. *)
 

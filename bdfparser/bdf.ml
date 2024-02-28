@@ -133,7 +133,13 @@ let glyph_of_char (font : t) (u : Uchar.t) : glyph option =
   )
 
 let glyph_name (g : glyph) : string =
-    g.name
+  g.name
+
+let glyph_bbox (g : glyph) : (int * int * int * int) =
+  g.bounding_box
+
+let glyph_dwidth (g : glyph) : (int * int) =
+  g.dwidth
 
 let glyph_dimensions (g : glyph) : (int * int) =
   (* This is totes wrong, but enough to bootstrap with I think for basic western chars *)
