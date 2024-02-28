@@ -22,11 +22,23 @@ ENDFONT|} in
 let test_comment _ =
   let prose =
 {|STARTFONT 2.1
-COMMENT "hello world"
+COMMENT "hello world 1"
 ENDFONT|} in
   let lexbuf = Lexing.from_string prose in
   let ast = Parser.prog Lexer.read lexbuf in
-  let expected = [(`Version 2.1) ; (`Comment {|"hello world"|}) ; (`Noop)] in
+  let expected = [(`Version 2.1) ; (`Comment {|"hello world 1"|}) ; (`Noop)] in
+  match ast with
+  | None -> assert_failure "Got nothing"
+  | Some l -> assert_equal l expected
+
+let test_unquoted_comment _ =
+  let prose =
+{|STARTFONT 2.1
+COMMENT hello world r
+ENDFONT|} in
+  let lexbuf = Lexing.from_string prose in
+  let ast = Parser.prog Lexer.read lexbuf in
+  let expected = [(`Version 2.1) ; (`Comment "hello world r") ; (`Noop)] in
   match ast with
   | None -> assert_failure "Got nothing"
   | Some l -> assert_equal l expected
@@ -254,11 +266,38 @@ ENDFONT|} in
     | None -> assert_failure "Got nothing"
     | Some l -> assert_equal l expected
 
+let test_char_bitmap _ =
+  let prose =
+{|STARTFONT 2.1
+CHARS 1
+STARTCHAR char0000
+BITMAP
+00
+01
+0A
+ENDCHAR
+ENDFONT|} in
+    let lexbuf = Lexing.from_string prose in
+    let ast = Parser.prog Lexer.read lexbuf in
+    let expected = [
+      (`Version 2.1) ;
+      (`Chars 1) ;
+      (`Char [
+        (`CharName "char0000") ;
+        (`Bitmap [0 ; 1 ; 10])
+      ]) ;
+      (`Noop)
+    ] in
+    match ast with
+    | None -> assert_failure "Got nothing"
+    | Some l -> assert_equal l expected
+
 let suite =
   "BasicParsingTests" >::: [
     "test_empty_parsing" >:: test_empty_parsing ;
     "test_basic_parsing" >:: test_basic_parsing ;
     "Comment" >:: test_comment ;
+    "Unquoted comment" >:: test_unquoted_comment ;
     "Empty properties" >:: test_properties_empty ;
     "Filled properties" >:: test_properties ;
     "Font name" >:: test_font_name ;
@@ -271,6 +310,7 @@ let suite =
     "Char encoding" >:: test_char_encoding ;
     "Char bounding box" >:: test_char_bbx ;
     "Test S/Dwidth" >:: test_char_widths ;
+    "Test character bitmap" >:: test_char_bitmap ;
   ]
 
 let () =

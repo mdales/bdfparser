@@ -4,7 +4,6 @@ open Parser
 exception SyntaxError of string
 }
 
-
 let newline = ['\r' '\n']+
 let white = [' ' '\t']+
 let digit = ['0'-'9']
@@ -13,8 +12,8 @@ let int = '-'? digit+
 let hexint = hexdigit+
 let frac = '.' digit*
 let float = digit+ frac
-let name = ['a'-'z' 'A'-'Z' '-' '0'-'9' '_' '+']+
-let string = '"' ['a'-'z' 'A'-'Z' '-' '0'-'9' ' ' '/' ':' '.' ',']* '"'
+let name = ['a'-'z' 'A'-'Z' '-' '0'-'9' '/' ':' '.' ',' '_' '+' '@' '/']+
+let string = '"' ['a'-'z' 'A'-'Z' '-' '0'-'9' ' ' '/' ':' '.' ',' '_' '+' '@' '/']* '"'
 
 rule read =
   parse

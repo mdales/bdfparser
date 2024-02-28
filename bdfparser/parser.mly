@@ -44,7 +44,9 @@ bounding_box:
   BOUNDINGBOX ; fBBx = INT ; fBBy = INT ; xoff = INT ; yoff = INT { (fBBx, fBBy, xoff, yoff) }
 
 comment:
-  COMMENT ; v = STRING { v }
+  | COMMENT ; v = STRING { v }
+  | COMMENT ; v = list(NAME) { String.concat " " v }
+  ;
 
 chars:
   CHARS ; v = INT { v }
