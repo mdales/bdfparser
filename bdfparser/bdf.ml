@@ -141,11 +141,11 @@ let glyph_bbox (g : glyph) : (int * int * int * int) =
 let glyph_dwidth (g : glyph) : (int * int) =
   g.dwidth
 
-let glyph_dimensions (g : glyph) : (int * int) =
+let glyph_dimensions (g : glyph) : (int * int * int * int) =
   (* This is totes wrong, but enough to bootstrap with I think for basic western chars *)
   let x, _ = g.dwidth in
-  let _, y, _, _ = g.bounding_box in
-  (x, y)
+  let _, y, ox, oy = g.bounding_box in
+  (x, y, ox, oy)
 
 let glyph_bitmap (g : glyph) : bytes =
   g.bitmap

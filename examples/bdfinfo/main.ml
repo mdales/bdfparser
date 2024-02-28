@@ -32,8 +32,8 @@ let display_char_info (f : Bdf.t) (c : char) : unit =
   | Some g -> (
     let name = Bdf.glyph_name g in
     Printf.printf "\nCharacter: %c\nName: %s\n" c name;
-    let x, y = Bdf.glyph_dimensions g in
-    Printf.printf "Dimensions: %d x %d\n" x y;
+    let x, y, ox, oy = Bdf.glyph_dimensions g in
+    Printf.printf "Dimensions: %d x %d at %d, %d\n" x y ox oy;
     let bbw, bbh, bxoff0x, bbyoff0y = Bdf.glyph_bbox g in
     Printf.printf "Bounding box: %d %d %d %d\n" bbw bbh bxoff0x bbyoff0y;
     let dx, dy = Bdf.glyph_dwidth g in
