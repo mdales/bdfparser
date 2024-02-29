@@ -266,6 +266,29 @@ ENDFONT|} in
     | None -> assert_failure "Got nothing"
     | Some l -> assert_equal l expected
 
+let test_char_vvector _ =
+  let prose =
+{|STARTFONT 2.1
+CHARS 1
+STARTCHAR char0000
+VVECTOR 1 2
+ENDCHAR
+ENDFONT|} in
+    let lexbuf = Lexing.from_string prose in
+    let ast = Parser.prog Lexer.read lexbuf in
+    let expected = [
+      (`Version 2.1) ;
+      (`Chars 1) ;
+      (`Char [
+        (`CharName "char0000") ;
+        (`VVector (1, 2))
+      ]) ;
+      (`Noop)
+    ] in
+    match ast with
+    | None -> assert_failure "Got nothing"
+    | Some l -> assert_equal l expected
+
 let test_char_bitmap _ =
   let prose =
 {|STARTFONT 2.1
@@ -310,6 +333,7 @@ let suite =
     "Char encoding" >:: test_char_encoding ;
     "Char bounding box" >:: test_char_bbx ;
     "Test S/Dwidth" >:: test_char_widths ;
+    "Test VVector" >:: test_char_vvector ;
     "Test character bitmap" >:: test_char_bitmap ;
   ]
 
