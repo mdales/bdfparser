@@ -30,15 +30,15 @@ let display_char_info (f : Bdf.t) (c : char) : unit =
   match Bdf.glyph_of_char f (Uchar.of_char c) with
   | None -> Printf.printf "\nCharacter: %c\nNot found\n" c
   | Some g -> (
-    let name = Bdf.glyph_name g in
+    let name = Bdf.Glyph.name g in
     Printf.printf "\nCharacter: %c\nName: %s\n" c name;
-    let x, y, ox, oy = Bdf.glyph_dimensions g in
+    let x, y, ox, oy = Bdf.Glyph.dimensions g in
     Printf.printf "Dimensions: %d x %d at %d, %d\n" x y ox oy;
-    let bbw, bbh, bxoff0x, bbyoff0y = Bdf.glyph_bbox g in
+    let bbw, bbh, bxoff0x, bbyoff0y = Bdf.Glyph.bbox g in
     Printf.printf "Bounding box: %d %d %d %d\n" bbw bbh bxoff0x bbyoff0y;
-    let dx, dy = Bdf.glyph_dwidth g in
+    let dx, dy = Bdf.Glyph.dwidth g in
     Printf.printf "DWidth: %d %d\n" dx dy;
-    let bitmap = Bdf.glyph_bitmap g in
+    let bitmap = Bdf.Glyph.bitmap g in
     draw_char bitmap x;
   )
 

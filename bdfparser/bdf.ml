@@ -1,27 +1,79 @@
 
-type glyph = {
-  name : string;
-  encoding : int;
-  swidth : int * int;
-  swidth1 : int * int;
-  dwidth : int * int;
-  dwidth1 : int * int ;
-  vvector : int * int ;
-  bounding_box : int * int * int * int ;
-  bitmap : bytes;
-}
+module Glyph = struct
+  type t = {
+    name : string;
+    encoding : int;
+    swidth : int * int;
+    swidth1 : int * int;
+    dwidth : int * int;
+    dwidth1 : int * int ;
+    vvector : int * int ;
+    bounding_box : int * int * int * int ;
+    bitmap : bytes;
+  }
 
-let default_glyph = {
-  name = "" ;
-  encoding = 0 ;
-  swidth = (0, 0) ;
-  swidth1 = (0, 0) ;
-  dwidth = (0, 0) ;
-  dwidth1 = (0, 0) ;
-  vvector = (0, 0) ;
-  bounding_box = (0, 0, 0, 0) ;
-  bitmap = Bytes.empty ;
-}
+  let name g  =
+    g.name
+
+  let bbox g =
+    g.bounding_box
+
+  let dwidth g =
+    g.dwidth
+
+  let encoding g =
+    g.encoding
+
+  let dimensions g =
+    (* This is totes wrong, but enough to bootstrap with I think for basic western chars *)
+    let x, _ = g.dwidth in
+    let _, y, ox, oy = g.bounding_box in
+    (x, y, ox, oy)
+
+  let bitmap g =
+    g.bitmap
+
+  let innerchar_to_glyph (ic : Innertypes.char_property_val list) : t =
+    let default_glyph = {
+      name = "" ;
+      encoding = 0 ;
+      swidth = (0, 0) ;
+      swidth1 = (0, 0) ;
+      dwidth = (0, 0) ;
+      dwidth1 = (0, 0) ;
+      vvector = (0, 0) ;
+      bounding_box = (0, 0, 0, 0) ;
+      bitmap = Bytes.empty ;
+    } in
+    List.fold_left (fun (acc : t) (item : Innertypes.char_property_val) : t ->
+      match item with
+      | `CharName n -> { acc with name=n }
+      | `Encoding e -> { acc with encoding=e }
+      | `SWidth s -> { acc with swidth=s }
+      | `DWidth s -> { acc with dwidth=s }
+      | `SWidth1 s -> { acc with swidth1=s }
+      | `DWidth1 s -> { acc with dwidth1=s }
+      | `VVector v -> { acc with vvector=v }
+      | `BBox b -> { acc with bounding_box=b }
+      | `Bitmap d -> (
+        (* this is poor, in that I currently assume the bbox has come first. In the spec the definition of
+           the bitmap field depends on the values in bbox, but it strictly doesn't say bbox must come first
+           so at some point we should do better, but for bootstrapping purposes I'm going to assume bbox
+           is valid by this point. *)
+        let w, _, _, _ = acc.bounding_box in
+        (* TODO we should asssert length of bitmap is same as h in bbox as per spec *)
+        let bytes_per_line = Int.of_float (ceil ((Float.of_int w) /. 8.)) in
+        let h = List.length d in
+        let bitmap = Bytes.create (h * bytes_per_line) in
+        List.iteri (fun r v ->
+          for c = 0 to (bytes_per_line - 1) do
+            Bytes.set bitmap ((r * bytes_per_line) + c) (char_of_int ((Int.shift_right v (8 * c)) land 0xFF))
+          done
+        ) d;
+        { acc with bitmap = bitmap }
+      )
+    ) default_glyph ic
+end
 
 type t = {
   version : float ;
@@ -31,7 +83,7 @@ type t = {
   content_version : int ;
   metric_set : int ;
   properties : (string * Innertypes.property_val) list;
-  glyphs : glyph array;
+  glyphs : Glyph.t array;
   map: (Uchar.t * int) list;
 }
 
@@ -47,35 +99,7 @@ let default_t = {
   map = [] ;
 }
 
-let innerchar_to_glyph (ic : Innertypes.char_property_val list) : glyph =
-  List.fold_left (fun (acc : glyph) (item : Innertypes.char_property_val) : glyph ->
-    match item with
-    | `CharName n -> { acc with name=n }
-    | `Encoding e -> { acc with encoding=e }
-    | `SWidth s -> { acc with swidth=s }
-    | `DWidth s -> { acc with dwidth=s }
-    | `SWidth1 s -> { acc with swidth1=s }
-    | `DWidth1 s -> { acc with dwidth1=s }
-    | `VVector v -> { acc with vvector=v }
-    | `BBox b -> { acc with bounding_box=b }
-    | `Bitmap d -> (
-      (* this is poor, in that I currently assume the bbox has come first. In the spec the definition of
-         the bitmap field depends on the values in bbox, but it strictly doesn't say bbox must come first
-         so at some point we should do better, but for bootstrapping purposes I'm going to assume bbox
-         is valid by this point. *)
-      let w, _, _, _ = acc.bounding_box in
-      (* TODO we should asssert length of bitmap is same as h in bbox as per spec *)
-      let bytes_per_line = Int.of_float (ceil ((Float.of_int w) /. 8.)) in
-      let h = List.length d in
-      let bitmap = Bytes.create (h * bytes_per_line) in
-      List.iteri (fun r v ->
-        for c = 0 to (bytes_per_line - 1) do
-          Bytes.set bitmap ((r * bytes_per_line) + c) (char_of_int ((Int.shift_right v (8 * c)) land 0xFF))
-        done
-      ) d;
-      { acc with bitmap = bitmap }
-    )
-  ) default_glyph ic
+
 
 
 let create (filename : string) : (t, string) result =
@@ -99,14 +123,14 @@ let create (filename : string) : (t, string) result =
         | `ContentVersion c -> { acc with content_version=c }
         | `Properties p -> { acc with properties=(List.concat [acc.properties ; p]) }
         | `Char c -> (
-          let g = innerchar_to_glyph c in
+          let g = Glyph.innerchar_to_glyph c in
           { acc with glyphs=(Array.of_list (g :: (Array.to_list acc.glyphs)))}
         )
         | `Noop -> acc
         ) default_t ast
       in
       (* having built it, now work out the lookup map *)
-      let map = Array.mapi (fun i g -> (Uchar.of_int g.encoding, i)) fnt.glyphs in
+      let map = Array.mapi (fun i g -> (Uchar.of_int (Glyph.encoding g), i)) fnt.glyphs in
       { fnt with map=(Array.to_list map) }
     )
   )
@@ -123,7 +147,7 @@ let version t =
 let glyph_count t =
   Array.length t.glyphs
 
-let glyph_of_char (font : t) (u : Uchar.t) : glyph option =
+let glyph_of_char (font : t) (u : Uchar.t) : Glyph.t option =
   match (List.assoc_opt u font.map) with
   | None -> None
   | Some index -> (
@@ -131,21 +155,3 @@ let glyph_of_char (font : t) (u : Uchar.t) : glyph option =
     | false -> None
     | true -> Some font.glyphs.(index)
   )
-
-let glyph_name (g : glyph) : string =
-  g.name
-
-let glyph_bbox (g : glyph) : (int * int * int * int) =
-  g.bounding_box
-
-let glyph_dwidth (g : glyph) : (int * int) =
-  g.dwidth
-
-let glyph_dimensions (g : glyph) : (int * int * int * int) =
-  (* This is totes wrong, but enough to bootstrap with I think for basic western chars *)
-  let x, _ = g.dwidth in
-  let _, y, ox, oy = g.bounding_box in
-  (x, y, ox, oy)
-
-let glyph_bitmap (g : glyph) : bytes =
-  g.bitmap
