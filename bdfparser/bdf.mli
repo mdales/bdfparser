@@ -23,12 +23,16 @@ module Glyph : sig
 end
 
 val create: string -> (t, string) result
+(** [create filename] Instantiates a BDF font from the specified font file, or returns an error as to why loading failed.*)
 
 val name: t -> string
+(** [name font] Returns the X11 name of the font. *)
 
 val bdf_version: t -> float
+(** [bdf_version font] Returns the version number of the BDF spec used for the font. *)
 
 val version: t -> int
+(** [verson font] Returns the content version specified in the font, or 0 if not specified. *)
 
 val glyph_count: t -> int
 (** [glyph_count font] Returns a count of how many glyphs are in the font. *)
