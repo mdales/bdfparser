@@ -30,8 +30,8 @@ rule read =
   | "CONTENTVERSION"  { CONTENTVERSION }
   | "DWIDTH"          { DWIDTH }
   | "DWIDTH1"         { DWIDTH1 }
-  | "ENCODING"        { ENCODING } 
-  | "ENDCHAR"         { ENDCHAR } 
+  | "ENCODING"        { ENCODING }
+  | "ENDCHAR"         { ENDCHAR }
   | "ENDFONT"         { ENDFONT }
   | "ENDPROPERTIES"   { ENDPROPERTIES }
   | "FONT"            { FONTNAME }
@@ -42,8 +42,7 @@ rule read =
   | "STARTPROPERTIES" { STARTPROPERTIES }
   | "SWIDTH"          { SWIDTH }
   | "SWIDTH1"         { SWIDTH1 }
-  | "VVECTOR"         { VVECTOR } 
+  | "VVECTOR"         { VVECTOR }
   | eof               { EOF }
   | name              { NAME (Lexing.lexeme lexbuf) }
   | string            { STRING (Lexing.lexeme lexbuf) }
-

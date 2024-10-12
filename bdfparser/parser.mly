@@ -43,9 +43,17 @@ size:
 bounding_box:
   BOUNDINGBOX ; fBBx = INT ; fBBy = INT ; xoff = INT ; yoff = INT { (fBBx, fBBy, xoff, yoff) }
 
+unquoted_comment_part:
+  // There has to be a better way to do this, as we lose the
+  // difference between a char A and char a, due to bouncing via int.
+  | v = INT       { Printf.sprintf "%d" v }
+  | v = HEXINT    { Printf.sprintf "%x" v }
+  | v = NAME      { v }
+  ;
+
 comment:
   | COMMENT ; v = STRING { v }
-  | COMMENT ; v = list(NAME) { String.concat " " v }
+  | COMMENT ; v = list(unquoted_comment_part) { String.concat " " v }
   ;
 
 chars:
@@ -62,7 +70,7 @@ metricset:
 property_str:
   k = NAME ; s = STRING ; EOL { (k, `String s) }
 
-property_int: 
+property_int:
   k = NAME ; i = INT ; EOL { (k, `Int i) }
 
 property:
@@ -77,7 +85,7 @@ property_list:
 properties:
   | STARTPROPERTIES ; i = INT ; EOL ; pl = property_list ; ENDPROPERTIES { let _ = i in pl }
   ;
-  
+
 // ----------------- CHARS ------------
 
 bbx:
@@ -122,7 +130,7 @@ char_part:
   ;
 
 startchar:
-  // Again, there has to be a better way to do this, as we lose the 
+  // Again, there has to be a better way to do this, as we lose the
   // difference between a char A and char a, due to bouncing via int.
   | STARTCHAR ; v = NAME { v }
   | STARTCHAR ; v = INT { Printf.sprintf "%d" v }
@@ -138,7 +146,7 @@ prog:
   | f = font { Some f }
   ;
 
-font: 
+font:
   | vl = separated_list(EOL, font_part); EOF { vl }
 
 font_part:
@@ -152,6 +160,6 @@ font_part:
   | v = contentversion  { `ContentVersion v }
   | v = font_name       { `FontName v }
   | v = metricset       { `MetricSet v }
-  | v = size            { `Size v } 
+  | v = size            { `Size v }
   | v = start_font      { `Version v }
   ;

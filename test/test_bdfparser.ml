@@ -1,7 +1,7 @@
 open OUnit2
 open Bdfparser
 
-let test_empty_parsing _ = 
+let test_empty_parsing _ =
   let lexbuf = Lexing.from_string "" in
   let ast = Parser.prog Lexer.read lexbuf in
   match ast with
@@ -9,7 +9,7 @@ let test_empty_parsing _ =
   | Some l -> assert_equal l []
 
 let test_basic_parsing _ =
-  let prose = 
+  let prose =
 {|STARTFONT 2.1
 ENDFONT|} in
   let lexbuf = Lexing.from_string prose in
@@ -34,16 +34,28 @@ ENDFONT|} in
 let test_unquoted_comment _ =
   let prose =
 {|STARTFONT 2.1
-COMMENT hello world r
+COMMENT hello world r matey
 ENDFONT|} in
   let lexbuf = Lexing.from_string prose in
   let ast = Parser.prog Lexer.read lexbuf in
-  let expected = [(`Version 2.1) ; (`Comment "hello world r") ; (`Noop)] in
+  let expected = [(`Version 2.1) ; (`Comment "hello world r matey") ; (`Noop)] in
   match ast with
   | None -> assert_failure "Got nothing"
   | Some l -> assert_equal l expected
 
-let test_properties_empty _ = 
+let test_unquoted_comment_2 _ =
+  let prose =
+{|STARTFONT 2.1
+COMMENT Created by Fondu from a mac NFNT/FONT resource
+ENDFONT|} in
+  let lexbuf = Lexing.from_string prose in
+  let ast = Parser.prog Lexer.read lexbuf in
+  let expected = [(`Version 2.1) ; (`Comment "Created by Fondu from a mac NFNT/FONT resource") ; (`Noop)] in
+  match ast with
+  | None -> assert_failure "Got nothing"
+  | Some l -> assert_equal l expected
+
+let test_properties_empty _ =
   let prose =
 {|STARTFONT 2.1
 STARTPROPERTIES 0
@@ -56,7 +68,7 @@ ENDFONT|} in
   | None -> assert_failure "Got nothing"
   | Some l -> assert_equal l expected
 
-let test_properties _ = 
+let test_properties _ =
   let prose =
 {|STARTFONT 2.1
 STARTPROPERTIES 2
@@ -67,18 +79,18 @@ ENDFONT|} in
   let lexbuf = Lexing.from_string prose in
   let ast = Parser.prog Lexer.read lexbuf in
   let expected = [
-    (`Version 2.1) ; 
-    (`Properties [ 
-      ("FONT_THING", (`Int 42)) ; 
+    (`Version 2.1) ;
+    (`Properties [
+      ("FONT_THING", (`Int 42)) ;
       ("FONT_OTHER", (`String {|"life, the universe, and everything"|}))
-    ]) ; 
+    ]) ;
     (`Noop)
   ] in
   match ast with
   | None -> assert_failure "Got nothing"
   | Some l -> assert_equal l expected
 
-let test_font_name _ = 
+let test_font_name _ =
   let prose =
 {|STARTFONT 2.1
 FONT -gnu-unifont-medium-r-normal--16-160-75-75-c-80-iso10646-1
@@ -86,15 +98,15 @@ ENDFONT|} in
   let lexbuf = Lexing.from_string prose in
   let ast = Parser.prog Lexer.read lexbuf in
   let expected = [
-    (`Version 2.1) ; 
-    (`FontName "-gnu-unifont-medium-r-normal--16-160-75-75-c-80-iso10646-1") ; 
+    (`Version 2.1) ;
+    (`FontName "-gnu-unifont-medium-r-normal--16-160-75-75-c-80-iso10646-1") ;
     (`Noop)
   ] in
   match ast with
   | None -> assert_failure "Got nothing"
   | Some l -> assert_equal l expected
 
-let test_font_size _ = 
+let test_font_size _ =
   let prose =
 {|STARTFONT 2.1
 SIZE 1 2 3
@@ -102,8 +114,8 @@ ENDFONT|} in
   let lexbuf = Lexing.from_string prose in
   let ast = Parser.prog Lexer.read lexbuf in
   let expected = [
-    (`Version 2.1) ; 
-    (`Size (1, 2, 3)) ; 
+    (`Version 2.1) ;
+    (`Size (1, 2, 3)) ;
     (`Noop)
   ] in
   match ast with
@@ -321,6 +333,7 @@ let suite =
     "test_basic_parsing" >:: test_basic_parsing ;
     "Comment" >:: test_comment ;
     "Unquoted comment" >:: test_unquoted_comment ;
+    "Unquoted comment 2" >:: test_unquoted_comment_2 ;
     "Empty properties" >:: test_properties_empty ;
     "Filled properties" >:: test_properties ;
     "Font name" >:: test_font_name ;

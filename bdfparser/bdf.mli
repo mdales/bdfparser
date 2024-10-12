@@ -1,3 +1,5 @@
+(** A library that reads {{:https://en.wikipedia.org/wiki/Glyph_Bitmap_Distribution_Format}BDF bitmap font files} and will return per glyph bitmaps. *)
+
 type t
 
 module Glyph : sig
@@ -16,6 +18,7 @@ module Glyph : sig
     (** [dimensions glyph] Returns the width and height of the specified glyph, along with the x and y offsets from the drawing location to allow for descenders etc. *)
 
     val encoding: t -> int
+    (** [encoding glyph] returns the character represented by the glyph *)
 
     val bitmap: t -> bytes
     (** [bitmap glyph] Renders a glyph to a series of bytes. The data is 1 bit per pixel,
